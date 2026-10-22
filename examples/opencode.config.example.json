@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "skillguard": {
+      "type": "local",
+      "command": ["C:\\SkillGuard\\.venv\\Scripts\\skillguard.exe", "mcp"],
+      "enabled": true
+    }
+  }
+}
