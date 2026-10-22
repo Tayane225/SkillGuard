@@ -3,6 +3,8 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -128,6 +130,43 @@ class McpTests(unittest.TestCase):
     def test_unknown_method(self) -> None:
         response = handle_message({"jsonrpc": "2.0", "id": 5, "method": "unknown"})
         self.assertEqual(response["error"]["code"], -32601)
+
+    def test_stdio_process_handshake(self) -> None:
+        messages = [
+            {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "initialize",
+                "params": {"protocolVersion": "2025-06-18"},
+            },
+            {"jsonrpc": "2.0", "method": "notifications/initialized"},
+            {"jsonrpc": "2.0", "id": 2, "method": "tools/list"},
+        ]
+        payload = "\n".join(json.dumps(message) for message in messages) + "\n"
+        process = subprocess.Popen(
+            [sys.executable, "-m", "skillguard", "mcp"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            encoding="utf-8",
+        )
+        try:
+            stdout, stderr = process.communicate(payload, timeout=15)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.communicate()
+            self.fail("SkillGuard MCP process did not exit after stdin closed")
+
+        self.assertEqual(process.returncode, 0, stderr)
+        responses = [json.loads(line) for line in stdout.splitlines() if line.strip()]
+        self.assertEqual(len(responses), 2, stdout)
+        self.assertEqual(responses[0]["result"]["serverInfo"]["name"], "skillguard")
+        self.assertEqual(
+            {tool["name"] for tool in responses[1]["result"]["tools"]},
+            {"scan_skill", "list_rules"},
+        )
+        self.assertNotIn("Traceback", stderr)
 
 
 if __name__ == "__main__":

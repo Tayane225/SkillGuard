@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "skillguard": {
-      "command": "C:\\SkillGuard\\.venv\\Scripts\\skillguard.exe",
+      "command": "skillguard",
       "args": ["mcp"]
     }
   }

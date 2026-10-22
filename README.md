@@ -23,6 +23,38 @@ SkillGuard is an independent project inspired by the problem space addressed by 
 
 ## Install
 
+### Global command for agent clients
+
+GUI agent applications often do not inherit a project virtual environment. Install SkillGuard as an isolated global command with `pipx`:
+
+```powershell
+py -3.11 -m pip install --user pipx
+py -3.11 -m pipx ensurepath
+py -3.11 -m pipx install "git+https://github.com/Tayane225/SkillGuard.git"
+```
+
+On Unix:
+
+```bash
+python3 -m pip install --user pipx
+python3 -m pipx ensurepath
+python3 -m pipx install "git+https://github.com/Tayane225/SkillGuard.git"
+```
+
+Restart the terminal and the agent application after `ensurepath`, then verify:
+
+```powershell
+skillguard version
+```
+
+To update:
+
+```powershell
+py -3.11 -m pipx install --force "git+https://github.com/Tayane225/SkillGuard.git"
+```
+
+### Local development
+
 From this directory:
 
 ```powershell
@@ -38,6 +70,8 @@ python3 -m venv .venv
 .venv/bin/python -m pip install --upgrade pip
 .venv/bin/python -m pip install -e .
 ```
+
+The virtual environment is not automatically visible to GUI applications. For MCP clients, either install with `pipx install .`, or add the virtual environment's `Scripts` or `bin` directory to `PATH`.
 
 ## CLI
 
@@ -75,35 +109,28 @@ SkillGuard exposes two MCP tools over stdio:
 - `scan_skill(target, online=false)`
 - `list_rules()`
 
-Example Claude Code configuration:
+The portable server command is:
+
+```text
+skillguard mcp
+```
+
+Most clients use this configuration:
 
 ```json
 {
   "mcpServers": {
     "skillguard": {
-      "command": "C:\\SkillGuard\\.venv\\Scripts\\skillguard.exe",
+      "command": "skillguard",
       "args": ["mcp"]
     }
   }
 }
 ```
 
-Example opencode configuration:
+Client-specific files and setup commands are in [`integrations/`](integrations/README.md). Each folder contains a template and merge instructions; do not replace unrelated servers in an existing client configuration. The covered clients are Claude Code, Claude Desktop, Codex, Cursor, Windsurf, Cline, Roo Code, Gemini CLI, VS Code/GitHub Copilot, Zed, OpenCode, and generic MCP clients. Manus is [documented separately](integrations/manus/README.md) because it does not have a verified native local-stdio connector.
 
-```json
-{
-  "$schema": "https://opencode.ai/config.json",
-  "mcp": {
-    "skillguard": {
-      "type": "local",
-      "command": ["C:\\SkillGuard\\.venv\\Scripts\\skillguard.exe", "mcp"],
-      "enabled": true
-    }
-  }
-}
-```
-
-See `examples/` for Codex and additional client snippets. The server writes only JSON-RPC messages to stdout and writes no logs to stdout.
+If a GUI client cannot find `skillguard`, use the absolute executable path from `where.exe skillguard` or `command -v skillguard`. The server writes only JSON-RPC messages to stdout and writes no logs to stdout.
 
 ## How scoring works
 

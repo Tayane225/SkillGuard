@@ -11,4 +11,7 @@ fi
 .venv/bin/python -m pip install --upgrade pip
 .venv/bin/python -m pip install -e .
 
-echo "SkillGuard installed. Run: .venv/bin/skillguard scan <target>"
+echo "SkillGuard installed in .venv."
+echo "Run: .venv/bin/skillguard scan <target>"
+echo "For MCP clients, install globally with: python3 -m pipx install ."
+echo "Or add $root/.venv/bin to PATH and restart the client."

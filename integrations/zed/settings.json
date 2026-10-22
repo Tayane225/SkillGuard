@@ -1,0 +1,9 @@
+{
+  "context_servers": {
+    "skillguard": {
+      "source": "custom",
+      "command": "skillguard",
+      "args": ["mcp"]
+    }
+  }
+}

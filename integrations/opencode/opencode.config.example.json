@@ -3,7 +3,7 @@
   "mcp": {
     "skillguard": {
       "type": "local",
-      "command": ["C:\\SkillGuard\\.venv\\Scripts\\skillguard.exe", "mcp"],
+      "command": ["skillguard", "mcp"],
       "enabled": true
     }
   }

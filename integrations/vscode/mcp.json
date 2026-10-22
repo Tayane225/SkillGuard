@@ -1,0 +1,9 @@
+{
+  "servers": {
+    "skillguard": {
+      "type": "stdio",
+      "command": "skillguard",
+      "args": ["mcp"]
+    }
+  }
+}

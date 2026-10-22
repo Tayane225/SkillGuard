@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "skillguard": {
+      "command": "skillguard",
+      "args": ["mcp"]
+    }
+  }
+}

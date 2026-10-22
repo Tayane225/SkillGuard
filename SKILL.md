@@ -18,13 +18,19 @@ Never install, import, or execute a skill before scanning it. A scan is not appr
 
 ## Scan a skill
 
-Use the project virtual environment when available:
+Use the installed command when available:
+
+```powershell
+skillguard scan <path-or-url> --format terminal
+```
+
+If SkillGuard is only available inside a project virtual environment:
 
 ```powershell
 .\.venv\Scripts\skillguard.exe scan <path-or-url> --format terminal
 ```
 
-If there is no virtual environment:
+If it is not installed as a command:
 
 ```powershell
 py -3.11 -m skillguard scan <path-or-url> --format terminal
@@ -33,7 +39,7 @@ py -3.11 -m skillguard scan <path-or-url> --format terminal
 Use JSON for automation:
 
 ```powershell
-.\.venv\Scripts\skillguard.exe scan <path-or-url> --format json --fail-on high
+skillguard scan <path-or-url> --format json --fail-on high
 ```
 
 The command exits with:
@@ -61,7 +67,7 @@ The command exits with:
 Run SkillGuard over stdio:
 
 ```powershell
-.\.venv\Scripts\skillguard.exe mcp
+skillguard mcp
 ```
 
 MCP tools:
@@ -69,10 +75,12 @@ MCP tools:
 - `scan_skill`: arguments `target` and optional `online`; returns a report and `structuredContent`.
 - `list_rules`: lists the detection catalog.
 
+Ready-to-copy client configurations are in `integrations/` for Claude Code, Claude Desktop, Codex, Cursor, Windsurf, Cline, Roo Code, Gemini CLI, VS Code, Zed, OpenCode, and generic MCP clients. Manus requires a sandbox or a secured remote bridge; see `integrations/manus/README.md`.
+
 ## Useful commands
 
 ```powershell
-.\.venv\Scripts\skillguard.exe rules
-.\.venv\Scripts\skillguard.exe rules --format json
-.\.venv\Scripts\skillguard.exe scan . --format markdown
+skillguard rules
+skillguard rules --format json
+skillguard scan . --format markdown
 ```
