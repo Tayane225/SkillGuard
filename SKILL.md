@@ -2,7 +2,7 @@
 name: skillguard
 description: Audit an AI agent skill, plugin, or instruction bundle before installation. Use when asked to scan, vet, security-review, or approve a skill; when a skill comes from a URL, Git repository, ZIP file, or local directory; or before installing any untrusted agent capability.
 license: MIT
-compatibility: Requires Python 3.10+ and git for repository scans
+compatibility: Requires Python 3.10+ and git for repository scans; a Docker image is provided
 metadata:
   version: "1.0.0"
   author: SkillGuard contributors
@@ -76,6 +76,17 @@ MCP tools:
 - `list_rules`: lists the detection catalog.
 
 Ready-to-copy client configurations are in `integrations/` for Claude Code, Claude Desktop, Codex, Cursor, Windsurf, Cline, Roo Code, Gemini CLI, VS Code, Zed, OpenCode, and generic MCP clients. Manus requires a sandbox or a secured remote bridge; see `integrations/manus/README.md`.
+
+## Docker
+
+If a local Python command is unavailable, run the non-root container and mount the workspace read-only:
+
+```powershell
+docker build --pull -t skillguard:local .
+docker run --rm -v "${PWD}:/workspace:ro" -w /workspace skillguard:local scan . --format terminal
+```
+
+Use `-i` and no `-t` when starting `skillguard mcp` in a container. The hardened MCP wrappers and client configurations are in `integrations/docker/`.
 
 ## Useful commands
 

@@ -20,6 +20,7 @@ SkillGuard is an independent project inspired by the problem space addressed by 
 - Python 3.10 or newer.
 - Git on `PATH` for Git repository scans.
 - No third-party Python runtime dependencies.
+- Docker is optional for containerized use. The image includes Python and Git.
 
 ## Install
 
@@ -72,6 +73,23 @@ python3 -m venv .venv
 ```
 
 The virtual environment is not automatically visible to GUI applications. For MCP clients, either install with `pipx install .`, or add the virtual environment's `Scripts` or `bin` directory to `PATH`.
+
+### Docker
+
+Build a non-root Linux image from this directory:
+
+```powershell
+docker build --pull -t skillguard:local .
+docker run --rm skillguard:local version
+```
+
+Scan a mounted workspace:
+
+```powershell
+docker run --rm -v "${PWD}:/workspace:ro" -w /workspace skillguard:local scan . --format terminal
+```
+
+On macOS and Linux, use `-v "$PWD:/workspace:ro"`. The container needs `-i` and no `-t` for MCP. Hardened flags, client wrappers, and Docker-specific paths are in [`integrations/docker/`](integrations/docker/README.md).
 
 ## CLI
 
@@ -128,7 +146,7 @@ Most clients use this configuration:
 }
 ```
 
-Client-specific files and setup commands are in [`integrations/`](integrations/README.md). Each folder contains a template and merge instructions; do not replace unrelated servers in an existing client configuration. The covered clients are Claude Code, Claude Desktop, Codex, Cursor, Windsurf, Cline, Roo Code, Gemini CLI, VS Code/GitHub Copilot, Zed, OpenCode, and generic MCP clients. Manus is [documented separately](integrations/manus/README.md) because it does not have a verified native local-stdio connector.
+Client-specific files and setup commands are in [`integrations/`](integrations/README.md). Each folder contains a template and merge instructions; do not replace unrelated servers in an existing client configuration. The covered clients are Claude Code, Claude Desktop, Codex, Cursor, Windsurf, Cline, Roo Code, Gemini CLI, VS Code/GitHub Copilot, Zed, OpenCode, and generic MCP clients. A hardened [Docker integration](integrations/docker/README.md) is also available. Manus is [documented separately](integrations/manus/README.md) because it does not have a verified native local-stdio connector.
 
 If a GUI client cannot find `skillguard`, use the absolute executable path from `where.exe skillguard` or `command -v skillguard`. The server writes only JSON-RPC messages to stdout and writes no logs to stdout.
 
@@ -157,6 +175,7 @@ Partial coverage can never produce `SAFE`. Missing `SKILL.md`, unreadable files,
 - Git clones are shallow, non-interactive, use isolated Git configuration, and do not run repository hooks.
 - Report evidence is redacted and truncated. Secret values are not reproduced.
 - Detection evidence may contain prompt-injection text. Treat it as inert data.
+- The optional Docker image runs as a non-root user. The documented invocation uses a read-only root filesystem, no added capabilities, and a read-only workspace mount.
 
 ## Limitations
 

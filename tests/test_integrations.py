@@ -25,6 +25,7 @@ CLIENTS = [
     "zed",
     "opencode",
     "manus",
+    "docker",
     "generic",
 ]
 
@@ -99,6 +100,68 @@ class IntegrationTests(unittest.TestCase):
         self.assertEqual(server["type"], "local")
         self.assertEqual(server["command"], ["skillguard", "mcp"])
         self.assertTrue(server["enabled"])
+
+    def test_docker_config_keeps_stdio_open_and_is_hardened(self) -> None:
+        config = load_json(INTEGRATIONS / "docker" / "mcp.docker.example.json")
+        server = config["mcpServers"]["skillguard"]
+        self.assertEqual(server["command"], "docker")
+        args = server["args"]
+        for flag in (
+            "--rm",
+            "-i",
+            "--read-only",
+            "--tmpfs",
+            "/tmp",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges",
+            "mcp",
+        ):
+            self.assertIn(flag, args)
+        self.assertIn("skillguard:local", args)
+        self.assertTrue(any(arg.endswith(":/workspace:ro") for arg in args))
+
+    def test_docker_wrappers_keep_stdio_open_and_are_hardened(self) -> None:
+        wrappers = {
+            "skillguard-mcp.sh": ('exec docker "$@"', "SKILLGUARD_WORKSPACE"),
+            "skillguard-mcp.ps1": ("& docker @dockerArgs", "SKILLGUARD_WORKSPACE"),
+        }
+        for name, (execution, workspace_env) in wrappers.items():
+            with self.subTest(wrapper=name):
+                text = (INTEGRATIONS / "docker" / name).read_text(encoding="utf-8")
+                self.assertIn(execution, text)
+                self.assertIn(workspace_env, text)
+                for flag in (
+                    "--rm",
+                    "-i",
+                    "--read-only",
+                    "--tmpfs",
+                    "/tmp",
+                    "--cap-drop",
+                    "ALL",
+                    "--security-opt",
+                    "no-new-privileges",
+                    "mcp",
+                ):
+                    self.assertIn(flag, text)
+
+    def test_dockerfile_uses_a_non_root_runtime(self) -> None:
+        text = (ROOT / "Dockerfile").read_text(encoding="utf-8")
+        self.assertIn("FROM python:3.12-slim-bookworm", text)
+        self.assertIn("ca-certificates", text)
+        self.assertIn("git", text)
+        self.assertIn("USER skillguard", text)
+        self.assertIn('ENTRYPOINT ["skillguard"]', text)
+        self.assertIn('CMD ["mcp"]', text)
+        self.assertIn("COPY --from=builder /opt/venv /opt/venv", text)
+
+    def test_dockerignore_excludes_development_state(self) -> None:
+        entries = set(
+            (ROOT / ".dockerignore").read_text(encoding="utf-8").splitlines()
+        )
+        for entry in (".git", ".venv", "tests", "integrations", "__pycache__"):
+            self.assertIn(entry, entries)
 
     def test_manus_is_documented_without_false_local_claim(self) -> None:
         config = load_json(INTEGRATIONS / "manus" / "mcp.sandbox.example.json")

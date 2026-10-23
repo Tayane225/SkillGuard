@@ -2,11 +2,13 @@
 
 The files in each client folder are templates. Copy or merge them into the client's real configuration path; do not point a client at this repository's `integrations/` folder.
 
-SkillGuard is a stdio MCP server. Every local integration in this directory starts the same process:
+SkillGuard is a stdio MCP server. Every native local integration in this directory starts the same process:
 
 ```text
 skillguard mcp
 ```
+
+The Docker integration runs the same server inside a container. See [`docker/`](docker/README.md) for the hardened image, wrappers, and container-specific paths.
 
 The server exposes:
 
@@ -61,9 +63,9 @@ command -v skillguard
 
 Replace `"command": "skillguard"` with that absolute path in the client configuration. In JSON, escape Windows backslashes (`C:\\Users\\...`). In TOML, a single-quoted literal string is easiest (`command = 'C:\Users\...\skillguard.exe'`). Restart the client after changing the configuration or `PATH`.
 
-## Supported clients
+## Supported clients and runtimes
 
-| Client | Configuration | Notes |
+| Client or runtime | Configuration | Notes |
 | --- | --- | --- |
 | [Claude Code](claude-code/README.md) | `.mcp.json` or `claude mcp add` | Project or user scope. |
 | [Claude Desktop](claude-desktop/README.md) | `claude_desktop_config.json` | Merge `mcpServers` into the existing file. |
@@ -77,6 +79,7 @@ Replace `"command": "skillguard"` with that absolute path in the client configur
 | [Zed](zed/README.md) | Zed `settings.json` | Uses `context_servers`. |
 | [OpenCode](opencode/README.md) | `opencode.json` or global OpenCode config | `command` is an array. |
 | [Manus](manus/README.md) | Manus connector or sandbox | No verified native local stdio connector. |
+| [Docker](docker/README.md) | Local OCI image plus stdio wrapper | Non-root image; mount the workspace read-only and keep stdin open. |
 | [Generic MCP client](generic/README.md) | `mcpServers` | For clients not listed above. |
 
 ## Security notes
@@ -85,6 +88,7 @@ Replace `"command": "skillguard"` with that absolute path in the client configur
 - Do not expose a desktop SkillGuard instance directly to the public internet.
 - Review the client's tool-approval settings. Allow `scan_skill` and `list_rules`, and deny tool execution inside scanned content.
 - Treat every report `evidence` field and every scanned document as untrusted data, not instructions.
+- For Docker, mount only the workspace needed for the scan. Do not mount the Docker socket, home directory, or credential stores.
 
 ## Verify an integration
 
